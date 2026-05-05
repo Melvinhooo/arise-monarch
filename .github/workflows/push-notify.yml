@@ -1,0 +1,68 @@
+name: ARISE — Push Notifications
+
+# GitHub Actions Cron sendet Web-Push-Reminder an alle subscribed Devices.
+# Cron-Zeiten in UTC. Deutschland = UTC+1 (Winter) / UTC+2 (Sommer).
+# Beispiel: Sommerzeit 09:00 Lokal = 07:00 UTC. Anpassen wenn DST wechselt.
+#
+# Voraussetzung (einmalig einrichten — siehe README "Phase 6b Setup"):
+#  1. VAPID-Keys generiert (npx web-push generate-vapid-keys, oder online)
+#  2. Repo Secrets gesetzt:
+#     - VAPID_PUBLIC_KEY
+#     - VAPID_PRIVATE_KEY
+#     - VAPID_SUBJECT  (z.B. "mailto:msejdiu@b-dhilden.de")
+#     - GIST_ID  (öffentlicher Gist mit Datei subscriptions.json)
+#     - GIST_TOKEN (PAT mit "gist" scope, nur lesend nötig wenn Gist public)
+#  3. Im Frontend: Notif.subscribePush(VAPID_PUBLIC_KEY, '<gist-write-endpoint>') aufrufen
+#     (kann einmalig manuell via DevTools-Console gemacht werden)
+
+on:
+  schedule:
+    - cron: '0 7 * * *'   # 09:00 MESZ — Wasser
+    - cron: '30 10 * * *' # 12:30 MESZ — Lunch
+    - cron: '0 16 * * *'  # 18:00 MESZ — Quest-Check
+    - cron: '0 19 * * *'  # 21:00 MESZ — Streak-Last-Call
+  workflow_dispatch:
+    inputs:
+      slot:
+        description: 'Welcher Slot manuell? (water_0900 | lunch_1230 | questCheck_1800 | streakRisk_2100 | test)'
+        required: true
+        default: 'test'
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine slot from cron time
+        id: slot
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "slot=${{ github.event.inputs.slot }}" >> $GITHUB_OUTPUT
+          else
+            HOUR=$(date -u +%H)
+            MIN=$(date -u +%M)
+            if [ "$HOUR" = "07" ]; then echo "slot=water_0900" >> $GITHUB_OUTPUT
+            elif [ "$HOUR" = "10" ] && [ "$MIN" = "30" ]; then echo "slot=lunch_1230" >> $GITHUB_OUTPUT
+            elif [ "$HOUR" = "16" ]; then echo "slot=questCheck_1800" >> $GITHUB_OUTPUT
+            elif [ "$HOUR" = "19" ]; then echo "slot=streakRisk_2100" >> $GITHUB_OUTPUT
+            else echo "slot=test" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install web-push
+        run: npm i web-push@3 node-fetch@3
+
+      - name: Send push to all subscribers
+        env:
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
+          GIST_ID: ${{ secrets.GIST_ID }}
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+          SLOT: ${{ steps.slot.outputs.slot }}
+        run: node .github/workflows/send-push.mjs
