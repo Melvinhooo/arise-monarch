@@ -1936,6 +1936,21 @@
     <button class="notif-btn" id="notif-test-btn">Test-Notification senden</button>
 
     <div class="notif-divider"></div>
+    <div class="drawer-settings-title" style="margin-top:0;">🔊 SOUNDS</div>
+    <div class="notif-row">
+      <label class="notif-toggle"><input type="checkbox" id="sound-enabled-toggle" checked><span>Sounds an/aus</span></label>
+    </div>
+    <div class="notif-row" style="gap:10px;">
+      <span style="font-size:11px;color:#9ca3af;font-family:'SF Mono',monospace;">VOL</span>
+      <input type="range" id="sound-volume-slider" min="0" max="100" value="60" style="flex:1;accent-color:#c084fc;">
+      <span id="sound-volume-label" style="font-size:11px;color:#c084fc;font-family:'SF Mono',monospace;min-width:34px;text-align:right;">60%</span>
+    </div>
+    <button class="notif-btn" id="sound-test-btn" style="background:linear-gradient(135deg,#7c3aed,#c084fc);">🔊 Test-Sound</button>
+    <div class="notif-hint" style="margin-bottom:0;">
+      iPhone Silent-Switch (oben links am Gerät) muss aus sein, sonst keine Sounds.
+    </div>
+
+    <div class="notif-divider"></div>
     <div class="drawer-settings-title" style="margin-top:0;">📡 GARANTIERTE PUSH (PHASE 6B)</div>
     <div class="drawer-settings-status" id="push-status">— nicht abonniert —</div>
     <button class="notif-btn notif-btn-push" id="notif-push-btn">📡 Garantierte Push aktivieren</button>
@@ -2435,10 +2450,15 @@
     state.activityLog[state.currentDay] = doneCount;
     state.questHistory[state.currentDay] = { ...state.dailyDone };
     state.xpHistory[state.currentDay] = state.todayXP || 0;
+    const prevStreak = state.streak || 0;
     if (doneCount >= 3) state.streak += 1;
     else state.streak = 0;
     if (doneCount >= 5) state.combo += 1;
     else state.combo = 0;
+    // Sound: Streak gerissen (vorher mind. 3 Tage, jetzt 0)
+    if (prevStreak >= 3 && state.streak === 0) {
+      try { setTimeout(() => window.AriseSounds?.streakBroken(), 600); } catch(e) {}
+    }
     state.dailyDone = {};
     state.todayXP = 0;
     state.currentDay = today;
@@ -3493,6 +3513,7 @@
       rankEl.style.display = 'block';
       overlay.classList.add('monarch');
       overlay.classList.add('show');
+      try { window.AriseSounds?.monarch(); } catch(e) {}
       setTimeout(() => overlay.classList.remove('show'), 5000);
       return;
     }
@@ -3501,10 +3522,12 @@
       sub.textContent = 'LEVEL ' + newLevel;
       rankEl.textContent = '⚡ RANG ' + rankInfo.rank + ' — ' + rankInfo.label;
       rankEl.style.display = 'block';
+      try { window.AriseSounds?.rankUp(); } catch(e) {}
     } else {
       text.textContent = 'LEVEL UP';
       sub.textContent = 'LEVEL ' + newLevel;
       rankEl.style.display = 'none';
+      try { window.AriseSounds?.levelUp(); } catch(e) {}
     }
     overlay.classList.add('show');
     setTimeout(() => overlay.classList.remove('show'), 2900);
@@ -3525,6 +3548,10 @@
     
     if (!wasDone) {
       spawnXpFloat(q.xp, evt);
+      // Sound: Quest erledigt
+      try { window.AriseSounds?.questDone(); } catch(e) {}
+      // Sound: 5. Quest des Tages erreicht → Combo-Trigger
+      if (todayDone === 5) { try { window.AriseSounds?.combo(); } catch(e) {} }
       const newLevel = calcLevel(state.xp);
       if (newLevel > oldLevel) {
         const r = getRank(newLevel);
@@ -3540,7 +3567,10 @@
     const wasDone = state.weeklyDone[q.id];
     state.weeklyDone[q.id] = !wasDone;
     state.xp = Math.max(0, state.xp + (wasDone ? -q.xp : q.xp));
-    if (!wasDone) setSystemMsg('BOSS BESIEGT! +' + q.xp + ' XP');
+    if (!wasDone) {
+      setSystemMsg('BOSS BESIEGT! +' + q.xp + ' XP');
+      try { window.AriseSounds?.questDone(); } catch(e) {}
+    }
     save(); render();
   }
 
@@ -3566,6 +3596,7 @@
     const tip = emergencyTips[Math.floor(Math.random() * emergencyTips.length)];
     document.getElementById('modal-tip').textContent = tip;
     document.getElementById('emergency-modal').classList.add('visible');
+    try { window.AriseSounds?.alert(); } catch(e) {}
   }
 
   document.getElementById('modal-another').onclick = showEmergencyTip;
@@ -3689,6 +3720,12 @@
 
 <script type="module">
 import { Notif } from './notifications.js';
+import { Sounds } from './sounds.js';
+
+// Audio-Unlock beim ersten User-Tap (iOS-requirement)
+const audioUnlock = () => { Sounds.unlock(); document.removeEventListener('touchstart', audioUnlock); document.removeEventListener('click', audioUnlock); };
+document.addEventListener('touchstart', audioUnlock, { once: true, passive: true });
+document.addEventListener('click', audioUnlock, { once: true });
 
 // --- Service Worker Registration ---
 if ('serviceWorker' in navigator) {
@@ -3787,6 +3824,36 @@ testBtn?.addEventListener('click', async () => {
   }
   refreshStatus();
 });
+
+// === Sound-Settings Wiring ===
+const soundEnabledToggle = document.getElementById('sound-enabled-toggle');
+const soundVolumeSlider = document.getElementById('sound-volume-slider');
+const soundVolumeLabel = document.getElementById('sound-volume-label');
+const soundTestBtn = document.getElementById('sound-test-btn');
+
+function loadSoundSettingsToUI() {
+  const s = Sounds.loadSettings();
+  if (soundEnabledToggle) soundEnabledToggle.checked = s.enabled;
+  if (soundVolumeSlider) soundVolumeSlider.value = Math.round((s.volume || 0.6) * 100);
+  if (soundVolumeLabel) soundVolumeLabel.textContent = Math.round((s.volume || 0.6) * 100) + '%';
+}
+
+function persistSoundSettings() {
+  const s = Sounds.loadSettings();
+  s.enabled = soundEnabledToggle?.checked ?? true;
+  s.volume = (soundVolumeSlider?.value ?? 60) / 100;
+  Sounds.saveSettings(s);
+  if (soundVolumeLabel) soundVolumeLabel.textContent = Math.round(s.volume * 100) + '%';
+}
+
+soundEnabledToggle?.addEventListener('change', persistSoundSettings);
+soundVolumeSlider?.addEventListener('input', persistSoundSettings);
+soundTestBtn?.addEventListener('click', () => {
+  Sounds.unlock();
+  Sounds.test();
+});
+
+loadSoundSettingsToUI();
 
 // --- Phase 6b: Push-Subscription ---
 const pushBtn = document.getElementById('notif-push-btn');
