@@ -26,6 +26,9 @@ on:
         description: 'Welcher Slot manuell? (water_0900 | lunch_1230 | questCheck_1800 | streakRisk_2100 | test)'
         required: true
         default: 'test'
+  push:
+    paths:
+      - 'subscriptions.json'
 
 jobs:
   push:
@@ -36,6 +39,9 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "slot=${{ github.event.inputs.slot }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            # Auto-Test wenn subscriptions.json sich geändert hat
+            echo "slot=test" >> $GITHUB_OUTPUT
           else
             HOUR=$(date -u +%H)
             MIN=$(date -u +%M)
