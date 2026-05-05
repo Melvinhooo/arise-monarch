@@ -133,7 +133,7 @@
     background: linear-gradient(90deg, transparent, rgba(192, 132, 252, 0.7), transparent);
   }
   .drawer-header {
-    padding: 22px 20px 18px;
+    padding: calc(22px + env(safe-area-inset-top)) 20px 18px;
     border-bottom: 1px solid rgba(168, 85, 247, 0.18);
     position: relative;
     overflow: hidden;
