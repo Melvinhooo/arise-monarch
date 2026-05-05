@@ -33,6 +33,8 @@ on:
 jobs:
   push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Determine slot from cron time
         id: slot
@@ -71,8 +73,6 @@ jobs:
         run: node .github/workflows/send-push.mjs
 
       - name: Auto-cleanup dead subscriptions (commit if changed)
-        permissions:
-          contents: write
         run: |
           if ! git diff --quiet subscriptions.json; then
             git config user.email "actions@github.com"
