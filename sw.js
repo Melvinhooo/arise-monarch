@@ -1,7 +1,7 @@
 // ARISE MONARCH — Service Worker
 // Cache-first für App-Shell, Network-first für /data/*.json, Push-Handler für GitHub-Actions-Notifications
 
-const VERSION = 'arise-v10';
+const VERSION = 'arise-v11';
 const SHELL_CACHE = `arise-shell-${VERSION}`;
 const DATA_CACHE = `arise-data-${VERSION}`;
 
@@ -84,10 +84,11 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      icon: './icons/apple-touch-icon.png',
-      badge: './icons/apple-touch-icon.png',
+      icon: './icons/apple-touch-icon-v2.png',
+      badge: './icons/apple-touch-icon-v2.png',
       tag: data.tag,
-      data: { url: data.url || './' },
+      // Speichere den scope explizit, damit notificationclick auf die richtige PWA-Origin zurückführt
+      data: { url: self.registration.scope },
       vibrate: [80, 40, 80]
     })
   );
@@ -95,11 +96,17 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const url = (event.notification.data && event.notification.data.url) || './';
+  // Immer auf den Service-Worker-Scope navigieren — das ist die garantierte PWA-URL
+  const targetUrl = (event.notification.data && event.notification.data.url) || self.registration.scope;
   event.waitUntil(
-    clients.matchAll({ type: 'window' }).then((all) => {
-      for (const c of all) { if (c.url.includes(url) && 'focus' in c) return c.focus(); }
-      if (clients.openWindow) return clients.openWindow(url);
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((all) => {
+      // Wenn die App schon offen ist: focus statt neuer Tab
+      for (const c of all) {
+        if (c.url.startsWith(self.registration.scope) && 'focus' in c) {
+          return c.focus();
+        }
+      }
+      if (clients.openWindow) return clients.openWindow(targetUrl);
     })
   );
 });

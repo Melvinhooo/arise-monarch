@@ -42,7 +42,9 @@ if (!Array.isArray(subs) || subs.length === 0) {
 
 console.log(`📨 ${subs.length} subscription(s) loaded`);
 
-const payload = JSON.stringify({ title: tpl.title, body: tpl.body, tag: tpl.tag, url: '/' });
+// URL ./ ist relativ zum SW-scope (https://<user>.github.io/arise-monarch/),
+// kein absolutes /, sonst landet der Klick auf der Domain-Root und gibt 404
+const payload = JSON.stringify({ title: tpl.title, body: tpl.body, tag: tpl.tag, url: './' });
 console.log(`📦 Payload: ${payload}`);
 
 const results = [];
