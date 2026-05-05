@@ -1,7 +1,7 @@
 // ARISE MONARCH — Service Worker
 // Cache-first für App-Shell, Network-first für /data/*.json, Push-Handler für GitHub-Actions-Notifications
 
-const VERSION = 'arise-v6';
+const VERSION = 'arise-v7';
 const SHELL_CACHE = `arise-shell-${VERSION}`;
 const DATA_CACHE = `arise-data-${VERSION}`;
 
@@ -40,6 +40,18 @@ self.addEventListener('fetch', (event) => {
 
   // Network-first für JSON-Daten — User kann data/*.json editieren, App pullt frisch wenn online
   if (url.pathname.includes('/data/') && url.pathname.endsWith('.json')) {
+    event.respondWith(
+      fetch(req).then((res) => {
+        const copy = res.clone();
+        caches.open(DATA_CACHE).then((c) => c.put(req, copy));
+        return res;
+      }).catch(() => caches.match(req))
+    );
+    return;
+  }
+
+  // Network-first für Coach-Output — Coaches schreiben hier, App pullt immer frisch wenn online
+  if (url.pathname.includes('/coach-output/')) {
     event.respondWith(
       fetch(req).then((res) => {
         const copy = res.clone();

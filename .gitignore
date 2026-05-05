@@ -9,4 +9,6 @@ node_modules/
 dist/
 .vscode/
 .idea/
-.claude/
+.claude/settings.local.json
+.claude/cache/
+# .claude/agents/ wird versioniert — Coach-Personas sind Repo-Asset
