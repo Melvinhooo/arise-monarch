@@ -2172,6 +2172,13 @@
     </div>
   </div>
 
+  <div class="panel coach-inline" data-coach="health" id="stats-health-card">
+    <h3>💚 HEALTH HEUTE <span class="label-mono coach-card-meta" style="margin-left:auto; font-size:9px;">—</span></h3>
+    <div class="coach-content">
+      <div class="coach-loading">⏳ Lade Coach-Output…</div>
+    </div>
+  </div>
+
   <div style="display:flex;gap:8px;">
     <button class="secondary" id="reset-day" style="flex:1;">Tag zurücksetzen</button>
     <button class="secondary danger" id="reset-all" style="flex:1;">Alles zurücksetzen</button>
@@ -3961,6 +3968,7 @@ const COACH_FILES = {
   fitness:   'coach-output/today-fitness.md',
   nutrition: 'coach-output/today-nutrition.md',
   weekly:    'coach-output/weekly-review.md',
+  health:    'coach-output/today-health.md',
   // Mindset: erst today-mindset.md probieren, dann weekly-mindset.md als Fallback
   mindset:   ['coach-output/today-mindset.md', 'coach-output/weekly-mindset.md']
 };
@@ -3969,7 +3977,8 @@ const COACH_CARDS = [
   { id: 'dash-mindset-card',  key: 'mindset' },
   { id: 'train-coach-card',   key: 'fitness' },
   { id: 'nutri-coach-card',   key: 'nutrition' },
-  { id: 'stats-weekly-card',  key: 'weekly' }
+  { id: 'stats-weekly-card',  key: 'weekly' },
+  { id: 'stats-health-card',  key: 'health' }
 ];
 
 function escapeHtml(s) {
@@ -4131,15 +4140,14 @@ tabIds.forEach(id => {
   if (!el) return;
   const obs = new MutationObserver(() => {
     if (el.style.display !== 'none') {
-      // Nur die relevante Card refreshen statt alle
+      // Welche Coach-Cards der jeweilige Tab enthält
       const cardMap = {
-        'content-dashboard': ['dash-mindset-card', 'mindset'],
-        'content-training':  ['train-coach-card', 'fitness'],
-        'content-nutrition': ['nutri-coach-card', 'nutrition'],
-        'content-stats':     ['stats-weekly-card', 'weekly']
+        'content-dashboard': [['dash-mindset-card', 'mindset']],
+        'content-training':  [['train-coach-card', 'fitness']],
+        'content-nutrition': [['nutri-coach-card', 'nutrition']],
+        'content-stats':     [['stats-weekly-card', 'weekly'], ['stats-health-card', 'health']]
       };
-      const [cid, ckey] = cardMap[id] || [];
-      if (cid && ckey) loadInlineCoach(cid, ckey);
+      (cardMap[id] || []).forEach(([cid, ckey]) => loadInlineCoach(cid, ckey));
     }
   });
   obs.observe(el, { attributes: true, attributeFilter: ['style'] });
