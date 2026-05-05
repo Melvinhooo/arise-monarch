@@ -1,9 +1,9 @@
 [
   {
-    "endpoint": "https://web.push.apple.com/QFddcvPm-ri8WDz4CwgIFRm-5d2LGoHMRvzvJkqqWk5gAmAvy4FSffhg_cugjEyYcfR4ZhqHnmsfNmTCR8TddDEl3v7dewM1n0_xKnARrYenFeqoSfrSCldO9sWEAxYm5IWAd1PwZ7k6s6FAjdNom6s5mSPY4OFNj_4A5PsbiLU",
+    "endpoint": "https://web.push.apple.com/QCmMfzu8dIVcLo1jo7eAlGDDAR_thk8F-ORxTEjXmwXDSjCRFPnjUMXB1EfYjGbpPR2spdWlQFW2Y03Cy4FD72yVAx0KTIaWh_wYJy_ZWvHqbGRzVwSZqUJMH7_EDmcuuwfSq9wihGNsYr6ofU-kweYCR0RbL1n5YgpvxFK61j4",
     "keys": {
-      "p256dh": "BEDoEG_HGLNr4sy_CX64XLhe9MCFT-YgGJtbFEMktuvQjqdGPYkDZjA_6AUx4Pg3mC_rDYslcP1X-bdHZP5Zyp4",
-      "auth": "M7lkg1WD3vCa-wtIUWAPZg"
+      "p256dh": "BPoCbXtFM6bD5I0_WoqBfOeUyxK-Q1RENky69uhxwPIqB2ZeHA2yHSEfdtYK1GkBWWpBAdgh3nB3DhocCt7qsco",
+      "auth": "TYLWBb-q7TLqMbAEdm1TlQ"
     }
   }
 ]
