@@ -1,11 +1,11 @@
 [
   {
-    "endpoint": "https://web.push.apple.com/QCmMfzu8dIVcLo1jo7eAlGDDAR_thk8F-ORxTEjXmwXDSjCRFPnjUMXB1EfYjGbpPR2spdWlQFW2Y03Cy4FD72yVAx0KTIaWh_wYJy_ZWvHqbGRzVwSZqUJMH7_EDmcuuwfSq9wihGNsYr6ofU-kweYCR0RbL1n5YgpvxFK61j4",
+    "endpoint": "https://web.push.apple.com/QMEx9HAfiaF0nvmC41F7d5D2Sy7i3Dksx7Sj3YtBb2l0qKu3_qUgasBKTL8wt0QXi84-L69O4tO77jFzSpVz43EEFqg_kKYDz1zxRUH_WH_ReJDe9TcYYKnRggTsmBY4QF1APDSUTPb3OZhRJgeOtgPBG82xJehVpuvPTPOUHao",
     "keys": {
-      "p256dh": "BPoCbXtFM6bD5I0_WoqBfOeUyxK-Q1RENky69uhxwPIqB2ZeHA2yHSEfdtYK1GkBWWpBAdgh3nB3DhocCt7qsco",
-      "auth": "TYLWBb-q7TLqMbAEdm1TlQ"
+      "p256dh": "BFUJWejMMC5kPjazI3LvEdQ7mFGxAZrGQ_SnqkdnWV1ombT8j1TQlHygV3IL2paOvAfm8drmV3EV9O8xWU8qWrs",
+      "auth": "zoVGk4yOf3KohqmPkRQ7iA"
     },
     "_added": "2026-05-05",
-    "_test_nonce": "test-2"
+    "_sw_version": "v11"
   }
 ]
