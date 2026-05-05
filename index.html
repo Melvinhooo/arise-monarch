@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="Arise">
 
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/svg+xml" href="icons/lightning.svg">
+<link rel="icon" type="image/svg+xml" href="icons/crown.svg">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
 
@@ -31,7 +31,7 @@
     color: #e5e9f0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     min-height: 100vh;
-    padding: 72px 16px 100px;
+    padding: calc(72px + env(safe-area-inset-top)) 16px calc(100px + env(safe-area-inset-bottom));
     max-width: 640px;
     margin: 0 auto;
     position: relative;
@@ -49,7 +49,8 @@
   .top-bar {
     position: fixed;
     top: 0; left: 0; right: 0;
-    height: 52px;
+    height: calc(52px + env(safe-area-inset-top));
+    padding-top: env(safe-area-inset-top);
     background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -57,7 +58,8 @@
     z-index: 100;
     display: flex;
     align-items: center;
-    padding: 0 14px;
+    padding-left: 14px;
+    padding-right: 14px;
     max-width: 640px;
     margin: 0 auto;
   }
@@ -1162,7 +1164,8 @@
   .top-bar {
     position: fixed;
     top: 0; left: 0; right: 0;
-    height: 64px;
+    height: calc(64px + env(safe-area-inset-top));
+    padding-top: env(safe-area-inset-top);
     background: rgba(0, 0, 0, 0.88);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
@@ -1170,7 +1173,8 @@
     z-index: 100;
     display: flex;
     align-items: center;
-    padding: 0 12px;
+    padding-left: 12px;
+    padding-right: 12px;
     max-width: 640px;
     margin: 0 auto;
     gap: 10px;

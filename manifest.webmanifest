@@ -13,13 +13,13 @@
   "categories": ["health", "fitness", "lifestyle"],
   "icons": [
     {
-      "src": "icons/lightning.svg",
+      "src": "icons/crown.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "icons/lightning-maskable.svg",
+      "src": "icons/crown.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "maskable"
