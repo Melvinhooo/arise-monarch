@@ -8,7 +8,7 @@ name: ARISE — Push Notifications
 #     Private-Key wird hier als Secret VAPID_PRIVATE_KEY gespeichert).
 #  2. Repo Secrets setzen:
 #     - VAPID_PRIVATE_KEY  (43 chars base64url)
-#     - VAPID_SUBJECT      (z.B. "mailto:msejdiu@b-dhilden.de")
+#     - VAPID_SUBJECT      (z.B. "mailto:melvin.sej@gmail.com")
 #  3. App auf iPhone öffnen → Drawer → "📡 Garantierte Push aktivieren"
 #     → Subscription-JSON wird angezeigt → an Claude im Chat schicken
 #     → Claude committed sie in subscriptions.json im Repo

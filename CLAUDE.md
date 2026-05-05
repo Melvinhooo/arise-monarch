@@ -13,7 +13,7 @@
 - Code-Erfahrung: 2-3 Hobby-Projekte, Terminal-Basics, **kein Power-User**, **keine TS-Erfahrung**
 - **Hat KEIN Node.js installiert** und will das auch nicht. **Kein Build-Step nutzen.**
 - Primär-Device: iPhone (App ist eine PWA, "Zum Home-Bildschirm" hinzufügen)
-- Email: msejdiu@b-dhilden.de
+- Email: melvin.sej@gmail.com
 
 ## Goldene Ernährungsregeln (für Quest-/Meal-Inhalte)
 
@@ -113,7 +113,7 @@ iOS pausiert lokale Notifications wenn die App geschlossen ist. Für garantierte
 2. **GitHub Repo → Settings → Secrets and variables → Actions**:
    - `VAPID_PUBLIC_KEY` = der publicKey aus Schritt 1
    - `VAPID_PRIVATE_KEY` = der privateKey aus Schritt 1
-   - `VAPID_SUBJECT` = `mailto:msejdiu@b-dhilden.de`
+   - `VAPID_SUBJECT` = `mailto:melvin.sej@gmail.com`
    - `GIST_ID` = ID eines public Gist mit einer Datei `subscriptions.json` (Inhalt: `[]` initial)
    - `GIST_TOKEN` = optional, nur nötig wenn Gist privat oder Schreiben gewünscht
 
