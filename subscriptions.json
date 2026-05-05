@@ -5,6 +5,7 @@
       "p256dh": "BPoCbXtFM6bD5I0_WoqBfOeUyxK-Q1RENky69uhxwPIqB2ZeHA2yHSEfdtYK1GkBWWpBAdgh3nB3DhocCt7qsco",
       "auth": "TYLWBb-q7TLqMbAEdm1TlQ"
     },
-    "_added": "2026-05-05"
+    "_added": "2026-05-05",
+    "_test_nonce": "test-2"
   }
 ]
