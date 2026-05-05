@@ -63,3 +63,17 @@ jobs:
           VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
           SLOT: ${{ steps.slot.outputs.slot }}
         run: node .github/workflows/send-push.mjs
+
+      - name: Auto-cleanup dead subscriptions (commit if changed)
+        permissions:
+          contents: write
+        run: |
+          if ! git diff --quiet subscriptions.json; then
+            git config user.email "actions@github.com"
+            git config user.name "ARISE Auto-Cleanup"
+            git add subscriptions.json
+            git commit -m "chore: auto-remove dead push subscriptions"
+            git push
+          else
+            echo "No subscription cleanup needed."
+          fi
