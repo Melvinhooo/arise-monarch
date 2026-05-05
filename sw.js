@@ -1,7 +1,7 @@
 // ARISE MONARCH — Service Worker
 // Cache-first für App-Shell, Network-first für /data/*.json, Push-Handler für GitHub-Actions-Notifications
 
-const VERSION = 'arise-v2';
+const VERSION = 'arise-v3';
 const SHELL_CACHE = `arise-shell-${VERSION}`;
 const DATA_CACHE = `arise-data-${VERSION}`;
 
@@ -13,7 +13,7 @@ const SHELL_FILES = [
   './icons/lightning.svg',
   './icons/lightning-maskable.svg',
   './icons/crown.svg',
-  './icons/apple-touch-icon.png',
+  './icons/apple-touch-icon-v2.png',
   'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'
 ];
 
