@@ -1725,45 +1725,43 @@
     margin: 18px 0;
   }
 
-  /* Coach-of-the-day Card */
-  .coach-panel {
+  /* Coach Inline-Cards (eingebettet in Tabs) */
+  .coach-inline {
     background: linear-gradient(135deg, rgba(20, 8, 38, 0.85), rgba(10, 4, 24, 0.95)) !important;
-    border: 1px solid rgba(168, 85, 247, 0.3) !important;
+    border: 1px solid rgba(168, 85, 247, 0.35) !important;
     box-shadow: 0 0 24px rgba(168, 85, 247, 0.12);
+    position: relative;
   }
-  .coach-meta {
+  .coach-inline::before {
+    content: 'AI';
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-family: 'SF Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    color: rgba(192, 132, 252, 0.6);
+    background: rgba(168, 85, 247, 0.12);
+    padding: 2px 6px;
+    border-radius: 3px;
+    pointer-events: none;
+  }
+  .coach-card-mini {
+    background: linear-gradient(135deg, rgba(20, 8, 38, 0.7), rgba(10, 4, 24, 0.85)) !important;
+    border: 1px solid rgba(251, 191, 36, 0.25) !important;
+    box-shadow: 0 0 18px rgba(251, 191, 36, 0.08);
+    padding: 14px 16px !important;
+  }
+  .coach-card-mini h3 {
+    font-size: 11px !important;
+    letter-spacing: 2.5px !important;
+    color: #fbbf24 !important;
+    margin-bottom: 8px !important;
+  }
+  .coach-card-meta {
     color: #6b7280 !important;
     letter-spacing: 1px;
   }
-  .coach-tabs {
-    display: flex;
-    gap: 4px;
-    margin: 8px 0 12px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  .coach-tab {
-    flex: 1;
-    min-width: 0;
-    background: rgba(15, 8, 25, 0.5);
-    border: 1px solid rgba(168, 85, 247, 0.18);
-    color: #9ca3af;
-    padding: 8px 6px;
-    border-radius: 6px;
-    font-family: 'SF Mono', monospace;
-    font-size: 10.5px;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-  .coach-tab.active {
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(120, 60, 220, 0.18));
-    border-color: rgba(192, 132, 252, 0.6);
-    color: #c084fc;
-    box-shadow: 0 0 12px rgba(168, 85, 247, 0.25);
-  }
-  .coach-tab:active { transform: scale(0.96); }
   .coach-content {
     background: rgba(0, 0, 0, 0.35);
     border: 1px solid rgba(168, 85, 247, 0.12);
@@ -1851,20 +1849,14 @@
     font-style: italic;
   }
   .coach-content p { margin: 6px 0; }
-  .coach-refresh-btn {
-    margin-top: 10px;
-    width: 100%;
-    background: rgba(15, 8, 25, 0.6);
-    border: 1px solid rgba(168, 85, 247, 0.25);
-    color: #9ca3af;
-    padding: 7px;
-    border-radius: 6px;
-    font-family: 'SF Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 1px;
-    cursor: pointer;
+  .coach-content-mini {
+    max-height: 220px;
+    font-size: 12px;
+    padding: 10px 12px;
   }
-  .coach-refresh-btn:active { transform: scale(0.97); background: rgba(168,85,247,0.15); }
+  .coach-content-mini h1 { font-size: 13px; margin-bottom: 6px; }
+  .coach-content-mini h2 { font-size: 12px; margin: 10px 0 4px; }
+  .coach-content-mini h3 { font-size: 11px; margin: 8px 0 3px; }
   .notif-hint {
     margin-top: 10px;
     font-size: 9.5px;
@@ -1979,18 +1971,11 @@
 <div class="system-banner" id="system-msg">⚡ ARISE — INITIALISIERUNG.</div>
 
 <div id="content-dashboard">
-  <div class="panel coach-panel" id="coach-panel">
-    <h3>🤖 COACH HEUTE <span class="label-mono coach-meta" id="coach-meta" style="margin-left:auto; font-size:9px;">—</span></h3>
-    <div class="coach-tabs">
-      <button class="coach-tab active" data-coach="fitness">🏋️ Fitness</button>
-      <button class="coach-tab" data-coach="nutrition">🥗 Nutrition</button>
-      <button class="coach-tab" data-coach="weekly">📊 Weekly</button>
-      <button class="coach-tab" data-coach="mindset">🔥 Mindset</button>
+  <div class="panel coach-card-mini" data-coach="mindset" id="dash-mindset-card">
+    <h3>🔥 MINDSET <span class="label-mono coach-card-meta" style="margin-left:auto; font-size:9px;">—</span></h3>
+    <div class="coach-content coach-content-mini">
+      <div class="coach-loading">⏳ Lade…</div>
     </div>
-    <div class="coach-content" id="coach-content">
-      <div class="coach-loading">⏳ Lade Coach-Output…</div>
-    </div>
-    <button class="coach-refresh-btn" id="coach-refresh-btn">↻ Neu laden</button>
   </div>
   <div class="panel">
     <h3>⚡ DAILY QUESTS <span class="label-mono" style="margin-left:auto;" id="dash-quest-progress">0 / 0</span></h3>
@@ -2035,6 +2020,12 @@
 </div>
 
 <div id="content-training" style="display:none;">
+  <div class="panel coach-inline" data-coach="fitness" id="train-coach-card">
+    <h3>🤖 COACH HEUTE <span class="label-mono coach-card-meta" style="margin-left:auto; font-size:9px;">—</span></h3>
+    <div class="coach-content">
+      <div class="coach-loading">⏳ Lade Coach-Output…</div>
+    </div>
+  </div>
   <div class="panel" style="background: linear-gradient(135deg, rgba(13, 29, 58, 0.5), rgba(26, 17, 69, 0.5)); border-color: rgba(168, 85, 247, 0.45);">
     <h3 style="color: #c084fc;">⚡ TRAININGSPRINZIP</h3>
     <p style="font-size: 13px; color: #d1d5db; line-height: 1.6; margin: 0;">
@@ -2057,6 +2048,12 @@
 </div>
 
 <div id="content-nutrition" style="display:none;">
+  <div class="panel coach-inline" data-coach="nutrition" id="nutri-coach-card">
+    <h3>🤖 COACH HEUTE <span class="label-mono coach-card-meta" style="margin-left:auto; font-size:9px;">—</span></h3>
+    <div class="coach-content">
+      <div class="coach-loading">⏳ Lade Coach-Output…</div>
+    </div>
+  </div>
   <div class="panel" style="background: linear-gradient(135deg, rgba(13, 38, 32, 0.5), rgba(13, 29, 58, 0.5)); border-color: rgba(93, 202, 165, 0.4);">
     <h3 style="color: #5dcaa5;">⚡ DEIN ERNÄHRUNGS-PRINZIP</h3>
     <p style="font-size: 13px; color: #d1d5db; line-height: 1.6; margin: 0;">
@@ -2152,6 +2149,14 @@
     <h3>VERLAUF</h3>
     <div id="weight-history"></div>
   </div>
+
+  <div class="panel coach-inline" data-coach="weekly" id="stats-weekly-card">
+    <h3>📊 WOCHEN-REVIEW <span class="label-mono coach-card-meta" style="margin-left:auto; font-size:9px;">—</span></h3>
+    <div class="coach-content">
+      <div class="coach-loading">⏳ Lade Coach-Output…</div>
+    </div>
+  </div>
+
   <div style="display:flex;gap:8px;">
     <button class="secondary" id="reset-day" style="flex:1;">Tag zurücksetzen</button>
     <button class="secondary danger" id="reset-all" style="flex:1;">Alles zurücksetzen</button>
@@ -3884,20 +3889,21 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-// ===== Coach-of-the-day Card =====
-const coachContent = document.getElementById('coach-content');
-const coachMeta = document.getElementById('coach-meta');
-const coachTabs = document.querySelectorAll('.coach-tab');
-const coachRefreshBtn = document.getElementById('coach-refresh-btn');
-
+// ===== Coach Inline-Cards (eingebettet in Tabs) =====
 const COACH_FILES = {
   fitness:   'coach-output/today-fitness.md',
   nutrition: 'coach-output/today-nutrition.md',
   weekly:    'coach-output/weekly-review.md',
-  mindset:   'coach-output/weekly-mindset.md'
+  // Mindset: erst today-mindset.md probieren, dann weekly-mindset.md als Fallback
+  mindset:   ['coach-output/today-mindset.md', 'coach-output/weekly-mindset.md']
 };
 
-let activeCoach = 'fitness';
+const COACH_CARDS = [
+  { id: 'dash-mindset-card',  key: 'mindset' },
+  { id: 'train-coach-card',   key: 'fitness' },
+  { id: 'nutri-coach-card',   key: 'nutrition' },
+  { id: 'stats-weekly-card',  key: 'weekly' }
+];
 
 function escapeHtml(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -3993,51 +3999,83 @@ function renderMarkdown(md) {
   return html;
 }
 
-async function loadCoach(key) {
-  const url = COACH_FILES[key];
-  if (!url) return;
-  coachContent.innerHTML = '<div class="coach-loading">⏳ Lade…</div>';
+async function fetchCoachFile(url) {
   try {
     const res = await fetch(url + '?t=' + Date.now());
-    if (!res.ok) {
-      coachContent.innerHTML = '<div class="coach-loading">— Noch kein Output für ' + key + ' —</div>';
-      coachMeta.textContent = 'nicht verfügbar';
-      return;
-    }
-    const md = await res.text();
-    coachContent.innerHTML = renderMarkdown(md);
-    coachContent.scrollTop = 0;
-    const lastMod = res.headers.get('last-modified');
-    if (lastMod) {
-      const d = new Date(lastMod);
-      const now = new Date();
-      const diffH = Math.floor((now - d) / 3600000);
-      coachMeta.textContent = diffH < 1 ? 'jetzt' : (diffH < 24 ? `vor ${diffH}h` : `vor ${Math.floor(diffH/24)}d`);
+    if (!res.ok) return null;
+    return { md: await res.text(), lastMod: res.headers.get('last-modified') };
+  } catch (e) { return null; }
+}
+
+async function loadInlineCoach(cardId, key) {
+  const card = document.getElementById(cardId);
+  if (!card) return;
+  const content = card.querySelector('.coach-content');
+  const metaEl = card.querySelector('.coach-card-meta');
+  if (!content) return;
+
+  const sources = COACH_FILES[key];
+  const urls = Array.isArray(sources) ? sources : [sources];
+
+  let result = null;
+  let usedUrl = null;
+  for (const url of urls) {
+    result = await fetchCoachFile(url);
+    if (result) { usedUrl = url; break; }
+  }
+
+  if (!result) {
+    const labels = { fitness: 'Fitness-Coach', nutrition: 'Nutrition-Coach', weekly: 'Wochen-Review', mindset: 'Mindset-Coach' };
+    content.innerHTML = '<div class="coach-loading">— Noch kein Output vom ' + (labels[key] || key) + ' —</div>';
+    if (metaEl) metaEl.textContent = '';
+    return;
+  }
+
+  content.innerHTML = renderMarkdown(result.md);
+  content.scrollTop = 0;
+  if (metaEl) {
+    if (result.lastMod) {
+      const d = new Date(result.lastMod);
+      const diffH = Math.floor((Date.now() - d.getTime()) / 3600000);
+      metaEl.textContent = diffH < 1 ? 'jetzt' : (diffH < 24 ? `vor ${diffH}h` : `vor ${Math.floor(diffH/24)}d`);
     } else {
-      coachMeta.textContent = '';
+      metaEl.textContent = '';
     }
-  } catch (e) {
-    coachContent.innerHTML = '<div class="coach-loading">⚠ Fehler beim Laden: ' + escapeHtml(String(e.message || e)) + '</div>';
   }
 }
 
-coachTabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    coachTabs.forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    activeCoach = tab.dataset.coach;
-    loadCoach(activeCoach);
-  });
-});
+function loadAllCoaches() {
+  COACH_CARDS.forEach(({ id, key }) => loadInlineCoach(id, key));
+}
 
-coachRefreshBtn?.addEventListener('click', () => loadCoach(activeCoach));
-
-// Initial load — Fitness
-loadCoach('fitness');
+// Initial load
+loadAllCoaches();
 
 // Refresh wenn App wieder im Vordergrund
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) loadCoach(activeCoach);
+  if (!document.hidden) loadAllCoaches();
+});
+
+// Tab-Switch refresh: wenn drawer-nav klickt, kommt der Tab-Switch im IIFE — wir laden danach neu
+// (catch-all via MutationObserver auf #content-* style-Änderungen)
+const tabIds = ['content-dashboard', 'content-training', 'content-nutrition', 'content-stats'];
+tabIds.forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const obs = new MutationObserver(() => {
+    if (el.style.display !== 'none') {
+      // Nur die relevante Card refreshen statt alle
+      const cardMap = {
+        'content-dashboard': ['dash-mindset-card', 'mindset'],
+        'content-training':  ['train-coach-card', 'fitness'],
+        'content-nutrition': ['nutri-coach-card', 'nutrition'],
+        'content-stats':     ['stats-weekly-card', 'weekly']
+      };
+      const [cid, ckey] = cardMap[id] || [];
+      if (cid && ckey) loadInlineCoach(cid, ckey);
+    }
+  });
+  obs.observe(el, { attributes: true, attributeFilter: ['style'] });
 });
 </script>
 </body>
