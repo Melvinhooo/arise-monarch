@@ -1,7 +1,10 @@
 // ARISE MONARCH — Notifications Module
-// Phase 6a: Lokale Notifications via Notification API + setTimeout
-// Phase 6b: Web-Push-Subscription wird in einem GitHub Gist gespeichert,
-//           GitHub Actions Cron sendet die Pushes (kein eigener Server nötig).
+// Phase 6a: Lokale Notifications via Notification API + setTimeout (App muss offen sein)
+// Phase 6b: Web-Push via VAPID — Subscriptions liegen in subscriptions.json im Repo,
+//           GitHub Actions Cron sendet die Pushes 4×/Tag.
+
+// Public VAPID-Key für ARISE MONARCH (Private-Key liegt als GitHub Secret im Repo)
+export const ARISE_VAPID_PUBLIC_KEY = 'BLyMAdOydy5aQcSwYlCMNZFl3f4rOyXgskGXLwTzUz-eY3aPFHpJxuA5NOFr1tyfKi1yhTCRWknZtVZCx1E1g_U';
 
 const ARISE_NOTIF_KEY = 'arise_notif_settings_v1';
 const ARISE_PUSH_KEY = 'arise_push_subscription_v1';
@@ -157,32 +160,38 @@ export const Notif = {
     }
   },
 
-  // ---------- Phase 6b: GitHub-Actions-Push ----------
-  // Wird über CLAUDE.md in einem späteren Schritt aktiviert.
-  // Vorbereitung: VAPID-Public-Key wird hier eingetragen, Subscription geht zu einem Gist.
-  async subscribePush(vapidPublicKey, gistEndpoint) {
+  // ---------- Phase 6b: GitHub-Actions-Push Subscription ----------
+  // Erstellt eine Push-Subscription via VAPID. Returned die Subscription-JSON,
+  // die dann ins Repo (subscriptions.json) committed werden muss damit der
+  // GitHub Actions Cron sie findet.
+  async subscribePush(vapidPublicKey = ARISE_VAPID_PUBLIC_KEY) {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-      return { ok: false, reason: 'unsupported' };
+      return { ok: false, reason: 'Push API nicht unterstützt — App muss als PWA installiert sein.' };
+    }
+    if (Notification.permission !== 'granted') {
+      const r = await this.requestPermission();
+      if (r !== 'granted') return { ok: false, reason: 'Permission nicht erteilt: ' + r };
     }
     try {
       const reg = await navigator.serviceWorker.ready;
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: this._urlBase64ToUint8Array(vapidPublicKey)
-      });
-      // POST zu Gist-Endpoint (User schreibt sich den selber zusammen, siehe CLAUDE.md)
-      if (gistEndpoint) {
-        await fetch(gistEndpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(sub.toJSON())
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) {
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: this._urlBase64ToUint8Array(vapidPublicKey)
         });
       }
-      try { localStorage.setItem(ARISE_PUSH_KEY, JSON.stringify(sub.toJSON())); } catch (e) {}
-      return { ok: true, subscription: sub };
+      const json = sub.toJSON();
+      try { localStorage.setItem(ARISE_PUSH_KEY, JSON.stringify(json)); } catch (e) {}
+      return { ok: true, subscription: json };
     } catch (e) {
-      return { ok: false, reason: String(e) };
+      return { ok: false, reason: String(e?.message || e) };
     }
+  },
+
+  hasPushSubscription() {
+    try { return !!localStorage.getItem(ARISE_PUSH_KEY); }
+    catch (e) { return false; }
   },
 
   _urlBase64ToUint8Array(b64) {

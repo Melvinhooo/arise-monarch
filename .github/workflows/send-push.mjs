@@ -1,19 +1,15 @@
 // ARISE — sendet Web-Push an alle subscribed Devices
-// Wird von push-notify.yml aufgerufen. Liest Subscriptions aus einem öffentlichen GitHub Gist.
-//
-// Slot-Templates kompatibel mit notifications.js NOTIF_TEMPLATES.
+// Liest Subscriptions aus subscriptions.json im Repo-Root.
+// Slot-Templates synchron mit notifications.js NOTIF_TEMPLATES.
 
 import webpush from 'web-push';
-import fetch from 'node-fetch';
+import fs from 'node:fs/promises';
 
-const {
-  VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT,
-  GIST_ID, GIST_TOKEN, SLOT
-} = process.env;
+const { VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT, SLOT } = process.env;
 
 if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY || !VAPID_SUBJECT) {
   console.error('VAPID keys missing — set repo secrets first.');
-  process.exit(0); // exit 0 = soft fail, sonst spammt Actions failures
+  process.exit(0);
 }
 
 webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
@@ -29,32 +25,17 @@ const TEMPLATES = {
 const tpl = TEMPLATES[SLOT] || TEMPLATES.test;
 console.log(`[ARISE] Slot=${SLOT}, sending: ${tpl.title} — ${tpl.body}`);
 
-if (!GIST_ID) {
-  console.warn('GIST_ID not set — no subscriptions to send to.');
+let subs = [];
+try {
+  const raw = await fs.readFile('subscriptions.json', 'utf8');
+  subs = JSON.parse(raw);
+} catch (e) {
+  console.warn('subscriptions.json not found or invalid — nothing to send.');
   process.exit(0);
 }
-
-const gistUrl = `https://api.github.com/gists/${GIST_ID}`;
-const headers = GIST_TOKEN ? { 'Authorization': `token ${GIST_TOKEN}`, 'Accept': 'application/vnd.github+json' } : {};
-
-const res = await fetch(gistUrl, { headers });
-if (!res.ok) {
-  console.error('Failed to fetch gist:', res.status, await res.text());
-  process.exit(0);
-}
-const gist = await res.json();
-const file = gist.files['subscriptions.json'];
-if (!file) {
-  console.warn('No subscriptions.json in gist — nothing to send.');
-  process.exit(0);
-}
-
-let subs;
-try { subs = JSON.parse(file.content); }
-catch (e) { console.error('subscriptions.json malformed:', e.message); process.exit(0); }
 
 if (!Array.isArray(subs) || subs.length === 0) {
-  console.log('No subscribers yet.');
+  console.log('No subscribers yet. Add one via the App → Drawer → 📡 Garantierte Push aktivieren.');
   process.exit(0);
 }
 
@@ -64,4 +45,9 @@ const results = await Promise.allSettled(
 );
 const ok = results.filter(r => r.status === 'fulfilled').length;
 const fail = results.length - ok;
+results.forEach((r, i) => {
+  if (r.status === 'rejected') {
+    console.warn(`[ARISE] sub #${i} failed:`, r.reason?.statusCode || r.reason?.message || r.reason);
+  }
+});
 console.log(`[ARISE] sent ${ok}/${results.length} (failed: ${fail})`);

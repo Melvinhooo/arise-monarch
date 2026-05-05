@@ -1,19 +1,18 @@
 name: ARISE — Push Notifications
 
 # GitHub Actions Cron sendet Web-Push-Reminder an alle subscribed Devices.
-# Cron-Zeiten in UTC. Deutschland = UTC+1 (Winter) / UTC+2 (Sommer).
-# Beispiel: Sommerzeit 09:00 Lokal = 07:00 UTC. Anpassen wenn DST wechselt.
+# Cron-Zeiten in UTC. Deutschland MESZ = UTC+2 (Sommer).
 #
-# Voraussetzung (einmalig einrichten — siehe README "Phase 6b Setup"):
-#  1. VAPID-Keys generiert (npx web-push generate-vapid-keys, oder online)
-#  2. Repo Secrets gesetzt:
-#     - VAPID_PUBLIC_KEY
-#     - VAPID_PRIVATE_KEY
-#     - VAPID_SUBJECT  (z.B. "mailto:msejdiu@b-dhilden.de")
-#     - GIST_ID  (öffentlicher Gist mit Datei subscriptions.json)
-#     - GIST_TOKEN (PAT mit "gist" scope, nur lesend nötig wenn Gist public)
-#  3. Im Frontend: Notif.subscribePush(VAPID_PUBLIC_KEY, '<gist-write-endpoint>') aufrufen
-#     (kann einmalig manuell via DevTools-Console gemacht werden)
+# Setup (einmalig):
+#  1. VAPID-Keys generiert (Public-Key ist hardcoded in notifications.js,
+#     Private-Key wird hier als Secret VAPID_PRIVATE_KEY gespeichert).
+#  2. Repo Secrets setzen:
+#     - VAPID_PRIVATE_KEY  (43 chars base64url)
+#     - VAPID_SUBJECT      (z.B. "mailto:msejdiu@b-dhilden.de")
+#  3. App auf iPhone öffnen → Drawer → "📡 Garantierte Push aktivieren"
+#     → Subscription-JSON wird angezeigt → an Claude im Chat schicken
+#     → Claude committed sie in subscriptions.json im Repo
+#  4. Cron läuft 4×/Tag automatisch.
 
 on:
   schedule:
@@ -55,14 +54,12 @@ jobs:
           node-version: '20'
 
       - name: Install web-push
-        run: npm i web-push@3 node-fetch@3
+        run: npm i web-push@3
 
       - name: Send push to all subscribers
         env:
-          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PUBLIC_KEY: 'BLyMAdOydy5aQcSwYlCMNZFl3f4rOyXgskGXLwTzUz-eY3aPFHpJxuA5NOFr1tyfKi1yhTCRWknZtVZCx1E1g_U'
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
           VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
-          GIST_ID: ${{ secrets.GIST_ID }}
-          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
           SLOT: ${{ steps.slot.outputs.slot }}
         run: node .github/workflows/send-push.mjs

@@ -1,7 +1,7 @@
 // ARISE MONARCH — Service Worker
 // Cache-first für App-Shell, Network-first für /data/*.json, Push-Handler für GitHub-Actions-Notifications
 
-const VERSION = 'arise-v5';
+const VERSION = 'arise-v6';
 const SHELL_CACHE = `arise-shell-${VERSION}`;
 const DATA_CACHE = `arise-data-${VERSION}`;
 

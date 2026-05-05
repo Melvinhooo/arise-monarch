@@ -1709,6 +1709,21 @@
     box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
   }
   .notif-btn:active { transform: scale(0.97); }
+  .notif-btn-push {
+    background: linear-gradient(135deg, #fbbf24, #c084fc);
+    color: #0a0418;
+    box-shadow: 0 0 14px rgba(251, 191, 36, 0.4);
+  }
+  .notif-btn-push.subscribed {
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    color: #fff;
+    box-shadow: 0 0 14px rgba(74, 222, 128, 0.4);
+  }
+  .notif-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.3), transparent);
+    margin: 18px 0;
+  }
   .notif-hint {
     margin-top: 10px;
     font-size: 9.5px;
@@ -1786,8 +1801,28 @@
       <input type="time" id="notif-workout-time" value="18:00" class="notif-time">
     </div>
     <button class="notif-btn" id="notif-test-btn">Test-Notification senden</button>
+
+    <div class="notif-divider"></div>
+    <div class="drawer-settings-title" style="margin-top:0;">📡 GARANTIERTE PUSH (PHASE 6B)</div>
+    <div class="drawer-settings-status" id="push-status">— nicht abonniert —</div>
+    <button class="notif-btn notif-btn-push" id="notif-push-btn">📡 Garantierte Push aktivieren</button>
     <div class="notif-hint">
-      iOS pausiert Web-Apps im Hintergrund. Lokale Erinnerungen feuern zuverlässig nur, wenn die App in den letzten ~30 Min offen war. Garantierte Pushes via GitHub Actions — siehe README.
+      Lokale Erinnerungen sterben wenn iOS die App pausiert. Diese Variante schickt der GitHub-Server die Pushes — feuert auch bei geschlossener App. Klick → Subscription-Code wird angezeigt → schick ihn an Claude im Chat.
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="push-modal">
+  <div class="modal-card" style="background: linear-gradient(135deg, #1a0530, #0a0210); border-color: rgba(251, 191, 36, 0.5); box-shadow: 0 0 60px rgba(251, 191, 36, 0.3); max-width: 520px;">
+    <div class="modal-icon" style="color: #fbbf24;">📡</div>
+    <div class="modal-title" style="color: #fbbf24;">PUSH SUBSCRIPTION</div>
+    <div class="modal-text" style="font-size: 12px; line-height: 1.5; margin-bottom: 12px;">
+      Kopier den Code unten, schick ihn Claude im Chat. Sobald committet, kommen die Pushes 4×/Tag automatisch.
+    </div>
+    <textarea id="push-sub-json" readonly style="width: 100%; min-height: 140px; background: rgba(0,0,0,0.4); color: #c084fc; border: 1px solid rgba(168,85,247,0.4); border-radius: 8px; padding: 10px; font-family: 'SF Mono', monospace; font-size: 10px; resize: none; line-height: 1.4; outline: none; margin-bottom: 16px;"></textarea>
+    <div class="modal-btn-row">
+      <button class="modal-btn secondary" id="push-modal-close">SCHLIESSEN</button>
+      <button class="modal-btn primary" id="push-modal-copy" style="background: linear-gradient(135deg, #fbbf24, #c084fc); border-color: rgba(251, 191, 36, 0.6); color: #0a0418;">📋 KOPIEREN</button>
     </div>
   </div>
 </div>
@@ -3593,6 +3628,67 @@ testBtn?.addEventListener('click', async () => {
   }
   refreshStatus();
 });
+
+// --- Phase 6b: Push-Subscription ---
+const pushBtn = document.getElementById('notif-push-btn');
+const pushStatus = document.getElementById('push-status');
+const pushModal = document.getElementById('push-modal');
+const pushSubJson = document.getElementById('push-sub-json');
+const pushModalClose = document.getElementById('push-modal-close');
+const pushModalCopy = document.getElementById('push-modal-copy');
+
+function refreshPushStatus() {
+  if (Notif.hasPushSubscription()) {
+    pushStatus.textContent = 'ABONNIERT — Subscription im Repo wartet auf Cron';
+    pushStatus.className = 'drawer-settings-status on';
+    pushBtn.textContent = '📡 Subscription erneut anzeigen';
+    pushBtn.classList.add('subscribed');
+  } else {
+    pushStatus.textContent = '— nicht abonniert —';
+    pushStatus.className = 'drawer-settings-status';
+    pushBtn.textContent = '📡 Garantierte Push aktivieren';
+    pushBtn.classList.remove('subscribed');
+  }
+}
+
+pushBtn?.addEventListener('click', async () => {
+  pushBtn.disabled = true;
+  pushBtn.textContent = '⏳ subscribing...';
+  const r = await Notif.subscribePush();
+  pushBtn.disabled = false;
+  if (!r.ok) {
+    alert('Push-Setup fehlgeschlagen:\n\n' + r.reason + '\n\nApp muss als PWA installiert sein (Zum Home-Bildschirm hinzufügen).');
+    refreshPushStatus();
+    return;
+  }
+  pushSubJson.value = JSON.stringify(r.subscription, null, 2);
+  pushModal.classList.add('visible');
+  refreshPushStatus();
+});
+
+pushModalClose?.addEventListener('click', () => {
+  pushModal.classList.remove('visible');
+});
+
+pushModal?.addEventListener('click', (e) => {
+  if (e.target.id === 'push-modal') pushModal.classList.remove('visible');
+});
+
+pushModalCopy?.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(pushSubJson.value);
+    pushModalCopy.textContent = '✅ KOPIERT';
+    setTimeout(() => { pushModalCopy.textContent = '📋 KOPIEREN'; }, 2000);
+  } catch (e) {
+    pushSubJson.select();
+    pushSubJson.setSelectionRange(0, 99999);
+    document.execCommand('copy');
+    pushModalCopy.textContent = '✅ KOPIERT';
+    setTimeout(() => { pushModalCopy.textContent = '📋 KOPIEREN'; }, 2000);
+  }
+});
+
+refreshPushStatus();
 
 // --- Höfliche Permission-Anfrage nach erster erledigter Quest ---
 let permissionAsked = false;
